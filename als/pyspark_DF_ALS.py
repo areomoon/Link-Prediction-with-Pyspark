@@ -9,7 +9,7 @@ from pyspark.ml.evaluation import BinaryClassificationEvaluator
 print('loading data...')
 # User_id1, User_id2, TimeStamp
 sc = SparkContext(conf=SparkConf())
-graph_cb_data = sc.textFile('graph_cb.txt').map(lambda line: line.split(" ")).map(lambda tokens: Row(user=int(tokens[0]),follower=int(tokens[1]),friendship=float(1)))
+graph_cb_data = sc.textFile('tweet_data/graph_cb.txt').map(lambda line: line.split(" ")).map(lambda tokens: Row(user=int(tokens[0]),follower=int(tokens[1]),friendship=float(1)))
 spark=SparkSession.builder.master("local").appName("tweet_graph_cb").getOrCreate()
 df=spark.createDataFrame(graph_cb_data)
 
