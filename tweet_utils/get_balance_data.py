@@ -3,6 +3,14 @@ import numpy as np
 import pandas as pd
 
 def get_balance_data(filepath,number_to_get=400000):
+    '''
+    Get balanced data from original graph_cb.txt file. Since the machine learning model would generate biased outcome
+    when we used the imbalanced data to train.
+
+    :param filepath: tweet_data/graph_cb.txt
+    :param number_to_get: the number of negative ground truth data to get
+    :return: save new balanced dataset and return the saved filepath
+    '''
     with open (filepath) as f:
         graph =[]
         for line in f.readlines():
@@ -17,7 +25,8 @@ def get_balance_data(filepath,number_to_get=400000):
     count_sample =number_to_get
     non_relation =[]
     while count_sample >0:
-        new_set =set(zip(np.array(graph_df['id_dst']) ,np.random.permutation(graph_df['id_scr'],seed=0))).copy()
+        np.random.seed(0)
+        new_set =set(zip(np.array(graph_df['id_dst']) ,np.random.permutation(graph_df['id_scr']))).copy()
         new_set =new_set - set(graph_df['relation'])
         if len(new_set ) >count_sample:
             new_set =list(new_set)[:count_sample]

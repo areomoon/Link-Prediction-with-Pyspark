@@ -6,7 +6,16 @@ import time
 
 # format
 class tweet_extractor():
+    '''
+    The object is used to extract tweet url and content data from "tweet_without_word" directory
+    '''
     def __init__(self,file_dir,cont_save_name='tweet_content_files',url_save_name='tweet_url_files'):
+        '''
+
+        :param file_dir: filepath ex:tweet_without_word/2011 or /2010
+        :param cont_save_name: defaulted save file name
+        :param url_save_name:  defaulted save file name
+        '''
         self.file_dir=file_dir
         self.cont_save_name=cont_save_name
         self.url_save_name=url_save_name
@@ -77,3 +86,16 @@ class tweet_extractor():
         save_name= os.path.splitext(os.path.basename(file_path))[0]+'url'+'.csv'
         save_name=os.path.join(save_file,save_name)
         df_with_url.to_csv(save_name)
+
+def get_name_n_hashtag(filepath,header=None):
+    s = pd.read_csv(filepath,header=header)
+    s['username'] = [re.findall(r"((?<=\'username\\t/).*?\')", i) for i in s[1]]
+    s['hashtag'] = [re.findall(r"((?<=\'hashtag\\t/search\?q\=\%23).*?\')", i) for i in s[1]]
+    s['username'] = s['username'].apply(lambda x: re.sub('\"', " ", re.sub("\[|\]|\'|,", " ", str(x))))
+    s['hashtag'] = s['hashtag'].apply(lambda x: re.sub('\"', " ", re.sub("\[|\]|\'|,", " ", str(x))))
+    s.drop([1], axis=1, inplace=True)
+    s.rename(columns={0: 'id'}, inplace=True)
+    save_name = os.path.splitext(os.path.basename(filepath))[0] + '_tag_n_username' + '.csv'
+    save_file = os.path.dirname(os.path.realpath(filepath))
+    save_name = os.path.join(save_file, save_name)
+    s.to_csv(save_name)
