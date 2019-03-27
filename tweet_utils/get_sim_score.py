@@ -4,7 +4,6 @@ from pyspark import SparkConf
 from pyspark import SparkContext, SQLContext
 from pyspark.sql import SparkSession,Row
 from pyspark.sql.functions import *
-from functools import reduce
 from graphframes import *
 import networkx as nx
 import pandas as pd
@@ -59,11 +58,7 @@ def get_jaccard(filepath):
    files = [re.findall('part-[0-9]+', x) for x in os.listdir(dir_path)]
    files = [subfile for file in files for subfile in file]
 
-   df = []
-   for file in files:
-      for line in open(os.path.join(dir_path, file), 'r'):
-         df.append(line.strip())
-
+   df = [line.strip() for file in files for line in open(os.path.join(dir_path, file), 'r')]
    df = pd.Series(df).apply(ast.literal_eval)
    df = pd.DataFrame(df.values.tolist(), columns=['src', 'dst', 'frd_src', 'frd_dst', 'relation'])
    df['jaccard'] = df.apply(lambda x: jaccard_cal(x['frd_src'], x['frd_dst']), axis=1)
