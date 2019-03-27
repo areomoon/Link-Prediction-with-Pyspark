@@ -5,7 +5,7 @@ from pyspark.sql import SparkSession,Row
 from pyspark.sql.functions import *
 from pyspark.ml.feature import VectorAssembler,StringIndexer
 from pyspark.ml.classification import RandomForestClassifier
-
+from pyspark.ml.evaluation import BinaryClassificationEvaluator
 
 print('loading data...')
 sc = SparkContext(conf=SparkConf())
@@ -30,11 +30,17 @@ assembler = VectorAssembler(inputCols=['pr_score_scr','pr_score_dst','jaccard'],
 df=assembler.transform(df)
 df=StringIndexer(inputCol="follow", outputCol="label").fit(df).transform(df).select('features','label')
 
-print('split train and test dataset')
+print('split train and test dataset...')
 train_df, test_df = df.randomSplit([0.7, 0.3],seed=0)
 
-print('train Randomforest model')
+print('train Randomforest model...')
 rf = RandomForestClassifier(numTrees=10, maxDepth=5, labelCol="label", seed=0)
 model = rf.fit(train_df)
-# http://spark.apache.org/docs/2.2.0/api/python/pyspark.ml.html
+
+print('Evaluation...')
+prediction=model.transform(test_df).select('label','probability','prediction')
+evaluator = BinaryClassificationEvaluator(rawPredictionCol="probability")
+print('Test Area Under ROC', evaluator.evaluate(prediction))
+
+
 pass
