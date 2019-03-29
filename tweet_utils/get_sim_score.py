@@ -1,16 +1,79 @@
 import findspark
 findspark.init()
-from pyspark import SparkConf
-from pyspark import SparkContext, SQLContext
+from pyspark import SparkConf, SparkContext, SQLContext
 from pyspark.sql import SparkSession,Row
-from pyspark.sql.functions import *
+from pyspark.sql.functions import udf,col,lit,split,regexp_replace
+from pyspark.sql.types import FloatType
 from graphframes import *
+from collections import Counter
 import networkx as nx
 import pandas as pd
 import os
 import re
 import ast
+import math
 
+
+
+def cosine_c(a, b):
+    if a == None or b == None or a == [''] or b == ['']:
+        return 0.0
+    else:
+        vec1 = Counter(a)
+        vec2 = Counter(b)
+        intersection = set(vec1.keys()) & set(vec2.keys())
+        numerator = sum([vec1[x] * vec2[x] for x in intersection])
+        sum1 = sum([vec1[x]**2 for x in vec1.keys()])
+        sum2 = sum([vec2[x]**2 for x in vec2.keys()])
+        denominator = math.sqrt(sum1) * math.sqrt(sum2)
+
+        if not denominator:
+            return 0.0
+        else:
+            return float(numerator) / denominator
+
+def get_cosine(filepath):
+    sc = SparkContext(conf=SparkConf())
+    spark = SparkSession.builder.master("local").appName("tweet").getOrCreate()
+
+    graph_cb_data = sc.textFile('tweet_data/graph_cb.txt').map(lambda line: line.split(" ")) \
+        .map(lambda tokens: Row(src=str(tokens[0]), dst=str(tokens[1]), relationship=str('follow')))
+    graph_cb = spark.createDataFrame(graph_cb_data)
+    user_map = sc.textFile('tweet_data/user_map.txt').map(lambda line: line.split(" ")) \
+        .map(lambda tokens: Row(origin_id=str(tokens[0]), name=str(tokens[1])))
+    user_map = spark.createDataFrame(user_map)
+    user_list = sc.textFile('tweet_data/user_list.txt').map(lambda line: line.split("\t")) \
+        .map(lambda tokens: Row(origin_id=str(tokens[0]), id=str(tokens[1])))
+    user_list = spark.createDataFrame(user_list)
+    user_table = user_list.join(user_map, user_map.origin_id == user_list.origin_id).select('id', 'name')
+
+    data = sc.textFile(filepath)
+    header = data.first()
+    data = data.filter(lambda x: x != header).map(lambda x: x.split(','))
+    username = data.map(lambda x: (x[1], x[2]))
+    username = username.mapValues(lambda x: re.split('\s*', x.strip())).mapValues(lambda x: ','.join(x))
+    hashtag = data.map(lambda x: (x[1], x[3]))
+    hashtag = hashtag.mapValues(lambda x: re.split('\s*', x.strip())).mapValues(lambda x: ','.join(x))
+    username = username.toDF(["src", "users"]).withColumn("users", split(regexp_replace("users", " ", ""), ','))
+    hashtag = hashtag.toDF(["src", "hashtag"]).withColumn("hashtag",split(regexp_replace("hashtag", " ", ""), ','))
+    tweet = hashtag.join(username, username.src == hashtag.src).select(hashtag.src, 'hashtag', 'users')
+
+    tweet_map = user_table.join(tweet, user_table.name == tweet.src, how='left').drop(tweet.src).drop(user_table.name)
+    src = graph_cb.join(tweet_map.withColumnRenamed('hashtag', 'src_hashtag') \
+                        .withColumnRenamed('users', 'src_users'), tweet_map.id == graph_cb.src, how='left').drop(
+        'relationship').drop('id')
+    full_data = src.join(tweet_map.withColumnRenamed('hashtag', 'dst_hashtag') \
+                         .withColumnRenamed('users', 'dst_users'), tweet_map.id == src.dst, how='left').drop('id').drop(
+        'relationship')
+    cosine_udfc = udf(lambda a, b: cosine_c(a, b), FloatType())
+    users_similarity = full_data.withColumn('users_similarity', cosine_udfc(col('src_users'), col('dst_users')))
+    similarity = users_similarity.withColumn('hashtag_similarity', cosine_udfc(col('src_hashtag'), col('dst_hashtag'))) \
+        .select(['src', 'dst', 'users_similarity', 'hashtag_similarity'])
+    output = similarity.toPandas()
+    save_file = os.path.dirname(os.path.realpath(filepath))
+    save_name = os.path.join(save_file,'tweet_cosine_sim.csv')
+    output.to_csv(save_name)
+    sc.stop
 
 
 def jaccard_cal(set_1, set_2):
