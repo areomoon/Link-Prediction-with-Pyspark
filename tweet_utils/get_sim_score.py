@@ -14,6 +14,36 @@ import ast
 import math
 
 
+def adamic_cal(set_1, set_2,df):
+   value =0
+   if (set_1 is not None) and (set_2 is not None):
+      set_1 = set(tuple(set_1))
+      set_2 = set(tuple(set_2))
+      set_3 = set_1.intersection(set_2)
+
+      if(set_3 is not None):
+         for x in set_3:
+           val=df.loc[df["usr"] == x, "frd_no"]
+           if len(val) == 0:
+              value=1
+           else:
+              n = val.values[0]
+              value += float(n)
+      else:
+         value = 0
+   return value
+
+def friend_adam_count(frd_list):
+
+   if frd_list is not None:
+      count=len(frd_list)
+      if count is not 1:
+         value=float(1)/float(math.log(count))
+      else:
+         value=0
+   else:
+      value=0
+   return value
 
 def cosine_c(a, b):
     if a == None or b == None or a == [''] or b == ['']:
@@ -215,3 +245,36 @@ def get_IPA_cluster(filepath, max_iter=5,save_file=True):
         save_file = os.path.dirname(os.path.realpath(filepath))
         save_name = os.path.join(save_file, 'clustering_id.csv')
         relation_df.coalesce(1).write.csv(save_name)
+
+def get_adamic(filepath):
+   conf = SparkConf()
+   sc = SparkContext(conf=conf)
+   spark=SparkSession.builder.master("local").appName("tweet").getOrCreate()
+
+   graph = sc.textFile(filepath) # import data as rdd
+   rdd = graph.map(lambda x: re.sub(r'[\D]', " ", x))
+   header=rdd.first()
+   rdd = rdd.filter(lambda x: x != header)
+   rdd = rdd.map(lambda x: re.split('\s+', x)).map(lambda x: (int(x[1]), int(x[2]), int(x[3])))
+
+   relation_df=rdd.map(lambda x: Row(src=x[2],dst=x[1],relationship=x[0]))
+   relation_df=spark.createDataFrame(relation_df)
+
+   rdd2 = rdd.filter(lambda x: x[0]==1).map(lambda x: (int(x[1]), int(x[2])))
+   rdd2 = rdd2.groupByKey().mapValues(lambda x: list(x))
+   rdd2 = rdd2.map(lambda x :Row(usr=x[0],frd=x[1]))
+   friend_df  =spark.createDataFrame(rdd2)
+
+   relation_df=relation_df.join(friend_df, relation_df.src==friend_df.usr, how='left').select('src',col('frd').alias('frd_src'),'dst','relationship')
+   relation_df=relation_df.join(friend_df, relation_df.dst==friend_df.usr, how='left').select('src','dst','frd_src',col('frd').alias('frd_dst'),'relationship')
+   relation_df=relation_df.toPandas()
+
+   friend_df=friend_df.toPandas()
+   friend_df["frd_no"] = friend_df["frd"].apply(lambda x : friend_adam_count(x))
+   friend_df.drop('frd',inplace=True,axis=1)
+
+   relation_df['adamic'] = relation_df.apply(lambda x: adamic_cal(x['frd_src'], x['frd_dst'],friend_df), axis=1)
+   save_file = os.path.dirname(os.path.realpath(filepath))
+   save_name = os.path.join(save_file,'tweet_adamic_sim.csv')
+   df=relation_df[['src', 'dst','adamic', 'relationship']]
+   df.to_csv(save_name)
