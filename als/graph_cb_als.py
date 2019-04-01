@@ -8,7 +8,7 @@ from pyspark.mllib.recommendation import ALS
 print('loading data...')
 # User_id1, User_id2, TimeStamp
 sc = SparkContext(conf=SparkConf())
-graph_cb_data = sc.textFile('tweet_data/graph_cb.txt')
+graph_cb_data = sc.textFile('../tweet_data/graph_cb.txt')
 
 
 print('Create train and test data...')

@@ -66,9 +66,8 @@ def get_cosine(filepath):
     sc = SparkContext(conf=SparkConf())
     spark = SparkSession.builder.master("local").appName("tweet").getOrCreate()
 
-    graph_cb_data = sc.textFile('tweet_data/graph_cb.txt').map(lambda line: line.split(" ")) \
-        .map(lambda tokens: Row(src=str(tokens[0]), dst=str(tokens[1]), relationship=str('follow')))
-    graph_cb = spark.createDataFrame(graph_cb_data)
+    graph_cb = spark.read.csv('tweet_data/graph_cb_balanced.csv', header=True)\
+        .select(col('id_scr').alias('src'),col('id_dst').alias('dst'))
     user_map = sc.textFile('tweet_data/user_map.txt').map(lambda line: line.split(" ")) \
         .map(lambda tokens: Row(origin_id=str(tokens[0]), name=str(tokens[1])))
     user_map = spark.createDataFrame(user_map)
@@ -155,7 +154,8 @@ def get_jaccard(filepath):
    df = pd.Series(df).apply(ast.literal_eval)
    df = pd.DataFrame(df.values.tolist(), columns=['src', 'dst', 'frd_src', 'frd_dst', 'relation'])
    df['jaccard'] = df.apply(lambda x: jaccard_cal(x['frd_src'], x['frd_dst']), axis=1)
-   save_name = save_name+'.csv'
+   save_file = os.path.dirname(os.path.realpath(filepath))
+   save_name = os.path.join(save_file, 'tweet_jaccard_sim.csv')
    df=df[['src', 'dst','jaccard', 'relation']]
    df.to_csv(save_name)
    return save_name
@@ -185,9 +185,8 @@ def get_pagerank(filepath,alpha=0.9,save_file=True):
     pr_df=pr_df[['relation','follow','pr_score_scr','pr_score_dst']]
 
     if save_file:
-        save_name = os.path.splitext(os.path.basename(filepath))[0] + '_withPRscore' + '.csv'
         save_file = os.path.dirname(os.path.realpath(filepath))
-        save_name = os.path.join(save_file, save_name)
+        save_name = os.path.join(save_file,'tweet_pagerank.csv')
         pr_df.to_csv(save_name)
         print('Save pr_score file in url: '+ save_name)
     return D,pr,pr_df
