@@ -7,6 +7,7 @@ from pyspark.sql.functions import col
 from pyspark.ml.recommendation import ALS
 from pyspark.ml.evaluation import BinaryClassificationEvaluator
 
+
 print('loading data...')
 # User_id1, User_id2, TimeStamp
 sc = SparkContext(conf=SparkConf())

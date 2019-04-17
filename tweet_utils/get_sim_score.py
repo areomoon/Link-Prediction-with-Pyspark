@@ -277,3 +277,4 @@ def get_adamic(filepath):
    save_name = os.path.join(save_file,'tweet_adamic_sim.csv')
    df=relation_df[['src', 'dst','adamic', 'relationship']]
    df.to_csv(save_name)
+   sc.stop

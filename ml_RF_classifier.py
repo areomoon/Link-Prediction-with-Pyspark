@@ -6,6 +6,7 @@ from pyspark.sql.functions import *
 from pyspark.ml.feature import VectorAssembler,StringIndexer
 from pyspark.ml.classification import RandomForestClassifier
 from pyspark.ml.evaluation import BinaryClassificationEvaluator
+from sklearn.metrics import f1_score
 
 print('Loading data...')
 sc = SparkContext(conf=SparkConf())
@@ -57,4 +58,8 @@ print('Evaluation...')
 prediction=model.transform(test_df).select('label','probability','prediction')
 evaluator = BinaryClassificationEvaluator(rawPredictionCol="probability")
 print('Area Under ROC:  {:.4f}'.format(evaluator.evaluate(prediction)))
+pd_pred=prediction.toPandas()
 sc.stop()
+f1=f1_score(pd_pred['label'],pd_pred['prediction'])
+print('F1_Score:  {:.4f}'.format(f1))
+
