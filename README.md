@@ -1,4 +1,4 @@
-# Tweet Link Prediction with Pyspark
+# Link Prediction in Twitter Network with Pyspark
 
 ## Data Resource
 Dataset: **Twitter-Dynamic-Net**  
