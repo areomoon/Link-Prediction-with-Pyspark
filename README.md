@@ -1,4 +1,4 @@
-# CS5344 Big Data Final Project -- Tweet Link Prediction
+# Tweet Link Prediction with Pyspark
 
 ## Data Resource
 Dataset: **Twitter-Dynamic-Net**  
