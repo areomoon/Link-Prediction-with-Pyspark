@@ -22,7 +22,7 @@ We use Spark APIs to implement Matrix Factorizationan,Alternating Least Squares 
 - pyspark
 
 
-## How to use the file?  
+## How to use the files?  
 ### 1.get preprocessed data 
 Execute the `get_data.py` to extract and create the similarity score features from our tweet dynamic net dataset. The files would be stored in the `tweet_data` file  
 `python get_data.py`  
@@ -34,7 +34,7 @@ Execute the `ALS_classifier.py` to generate forecast and evaluation by using the
 `python ALS_classifier.py`  
 
 ### 3.Predict the link by using **RandomForest algorithm**  
-Execute the `ml_RF_classifier.py` to generate forecast by using the similarity feature we get from previous calculation and do evaluation (F1-score)  
+Execute the `ml_RF_classifier.py` to generate forecast by using the similarity features we get from previous calculation and do evaluation (F1-score)  
 `python ml_RF_classifier.py`  
 
 
