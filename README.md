@@ -26,10 +26,13 @@ We use Spark APIs to implement Matrix Factorizationan,Alternating Least Squares 
 ### 1.get preprocessed data 
 Execute the `get_data.py` to extract and create the similarity score features from our tweet dynamic net dataset. The files would be stored in the `tweet_data` file  
 `python get_data.py`  
+
 ### 2.Predict the link by using **ALS algorithm**  
-**ALS:** Collaborative filtering is commonly used for recommender systems. These techniques aim to fill in the missing entries of a user-item association matrix. spark.ml currently supports model-based collaborative filtering, in which users and products are described by a small set of latent factors that can be used to predict missing entries. spark.ml uses the alternating least squares (ALS) algorithm to learn these latent factors. The implementation in spark.ml has the following parameters:  
+**ALS:** Collaborative filtering is commonly used for recommender systems. These techniques aim to fill in the missing entries of a user-item association matrix. spark.ml currently supports model-based collaborative filtering, in which users and products are described by a small set of latent factors that can be used to predict missing entries. spark.ml uses the alternating least squares (ALS) algorithm to learn these latent factors.   
+
 Execute the `ALS_classifier.py` to generate forecase and evaluation  
 `python ALS_classifier.py`  
+
 ### 3.Predict the link by using **RandomForest algorithm**  
 Execute the `ml_RF_classifier.py` to generate forecast by using the similarity feature we get from previous calculation and do evaluation (F1-score)  
 `python ml_RF_classifier.py`  
