@@ -30,7 +30,7 @@ Execute the `get_data.py` to extract and create the similarity score features fr
 ### 2.Predict the link by using **ALS algorithm**  
 **ALS:** Collaborative filtering is commonly used for recommender systems. These techniques aim to fill in the missing entries of a user-item association matrix. spark.ml currently supports model-based collaborative filtering, in which users and products are described by a small set of latent factors that can be used to predict missing entries. spark.ml uses the alternating least squares (ALS) algorithm to learn these latent factors.   
 
-Execute the `ALS_classifier.py` to generate forecase and evaluation  
+Execute the `ALS_classifier.py` to generate forecast and evaluation by using the `tweet_data/grapg_cb.txt` file  
 `python ALS_classifier.py`  
 
 ### 3.Predict the link by using **RandomForest algorithm**  
