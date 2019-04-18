@@ -20,6 +20,8 @@ We use Spark APIs to implement Matrix Factorizationan,Alternating Least Squares 
 - Python3.x
 - findspark
 - pyspark
+- pandas
+- numpy 
 
 
 ## How to use the files?  
