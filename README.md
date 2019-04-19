@@ -17,6 +17,7 @@ We use Spark APIs to implement Matrix Factorizationan,Alternating Least Squares 
 
 
 ## Requirements/Packages
+- networkx
 - Python3.x
 - findspark
 - pyspark
