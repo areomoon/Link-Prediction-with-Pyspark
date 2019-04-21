@@ -31,7 +31,8 @@ We use Spark APIs to implement Matrix Factorizationan,Alternating Least Squares 
 Execute the `get_data.py` to extract and create multiple similarity score features (**Adamic similarity, Jaccard similarity, Pagerank, Cosine similarity, W** on tweet text) from the tweet dynamic net dataset. The files would be stored in the `tweet_data` file  
 `python get_data.py`  
 
-**P.S: For the file `tweet_data/tweet_result_url_2011_tag_n_username.csv` used in the function, please refer to the following link: https://drive.google.com/open?id=1qr3yEBgPtphRmaWnihFkhyYdOlFsMEsg  **
+**P.S: For the file `tweet_data/tweet_result_url_2011_tag_n_username.csv` used in the function, please refer to the following link: https://drive.google.com/open?id=1qr3yEBgPtphRmaWnihFkhyYdOlFsMEsg**  
+
 
 ### 2.Predict the link by using **ALS algorithm**  
 **ALS:** Collaborative filtering is commonly used for recommender systems. These techniques aim to fill in the missing entries of a user-item association matrix. spark.ml currently supports model-based collaborative filtering, in which users and products are described by a small set of latent factors that can be used to predict missing entries. spark.ml uses the alternating least squares (ALS) algorithm to learn these latent factors.   
@@ -41,6 +42,7 @@ Execute the `ALS_classifier.py` to generate forecast and evaluation by using the
 
 ### 3.Predict the link by using **RandomForest algorithm**  
 Execute the `ml_RF_classifier.py` to generate forecast by using the similarity features we get from previous calculation and do evaluation (F1-score)  
-`python ml_RF_classifier.py`  
+`python ml_RF_classifier.py`   
+**P.S: For the file `tweet_data/tweet_wic.csv` used in the function, please refer to the following link: https://drive.google.com/file/d/1HoOVtPlN-txPaIeCxDeZpJdKNfvDroBr/view?usp=sharing**
 
 
