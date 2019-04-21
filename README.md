@@ -28,7 +28,7 @@ We use Spark APIs to implement Matrix Factorizationan,Alternating Least Squares 
 
 ## How to use the files?  
 ### 1.Get preprocessed data 
-Execute the `get_data.py` to extract and create multiple similarity score features (**Adamic similarity, Jaccard similarity, Pagerank, Cosine similarity** on tweet text) from the tweet dynamic net dataset. The files would be stored in the `tweet_data` file  
+Execute the `get_data.py` to extract and create multiple similarity score features (**Adamic similarity, Jaccard similarity, Pagerank, Cosine similarity, W** on tweet text) from the tweet dynamic net dataset. The files would be stored in the `tweet_data` file  
 `python get_data.py`  
 
 **P.S: For the file `tweet_data/tweet_result_url_2011_tag_n_username.csv` used in the function, please refer to the following link: https://drive.google.com/open?id=1qr3yEBgPtphRmaWnihFkhyYdOlFsMEsg  **
