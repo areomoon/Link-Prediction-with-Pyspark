@@ -26,21 +26,24 @@ cosine_sim=spark.read.csv('tweet_data/tweet_cosine_sim.csv', header=True)\
 adamic_sim=spark.read.csv('tweet_data/tweet_adamic_sim.csv', header=True)\
     .select(col('src').alias('id_scr'),col('dst').alias('id_dst'),col('adamic').alias('adamic_sim'),col('relationship'))
 
+wic = spark.read.csv('tweet_data/tweet_wic.csv', header=True)\
+    .select('id_scr','id_dst','WIC')
 
 print('Join dataframe...')
 df=graph_cb.join(pagerank,pagerank.relation==graph_cb.relation, how='left')\
     .select(graph_cb.relation,'id_dst','id_scr','pr_score_scr','pr_score_dst')
+df=df.join(wic,['id_scr','id_dst'])
 df=df.join(jaccard,['id_scr','id_dst'])
 df=df.join(cosine_sim,['id_scr','id_dst'])
 df=df.join(adamic_sim,['id_scr','id_dst'])
 
 print('Extract features...')
-df=df.select('follow','pr_score_scr','pr_score_dst','jaccard','adamic_sim','user_sim','hash_sim') #
-train_col=['follow','pr_score_scr','pr_score_dst','jaccard','adamic_sim','user_sim','hash_sim'] #
+df=df.select('follow','pr_score_scr','pr_score_dst','jaccard','adamic_sim','user_sim','hash_sim','WIC')
+train_col=['follow','pr_score_scr','pr_score_dst','jaccard','adamic_sim','user_sim','hash_sim','WIC']
 for i in train_col:
     df=df.withColumn(i,df[i].cast('float'))
 
-assembler = VectorAssembler(inputCols=['pr_score_scr','pr_score_dst','jaccard','adamic_sim','user_sim','hash_sim'], outputCol="features") #
+assembler = VectorAssembler(inputCols=['pr_score_scr','pr_score_dst','jaccard','adamic_sim','user_sim','hash_sim','WIC'], outputCol="features")
 df=assembler.transform(df)
 df = df.withColumnRenamed('follow','label').select('features','label')
 print('Split train and test dataset...')
