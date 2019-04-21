@@ -43,6 +43,7 @@ Execute the `ALS_classifier.py` to generate forecast and evaluation by using the
 ### 3.Predict the link by using **RandomForest algorithm**  
 Execute the `ml_RF_classifier.py` to generate forecast by using the similarity features we get from previous calculation and do evaluation (F1-score)  
 `python ml_RF_classifier.py`   
+
 **P.S: For the file `tweet_data/tweet_wic.csv` used in the function, please refer to the following link: https://drive.google.com/file/d/1HoOVtPlN-txPaIeCxDeZpJdKNfvDroBr/view?usp=sharing**
 
 
